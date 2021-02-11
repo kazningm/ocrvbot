@@ -57,10 +57,10 @@ def send(message):
     markup = types.InlineKeyboardMarkup()
     for key, value in reports.ANALIT_SPRAVKI_COMM.items():
         for spr in value:
-            if message.text.lower() in spr.name:
+            if message.text.lower() in spr.name.lower():
                 count_spr += 1
                 # если режим работы мода ПРОМ то ссылки на справки будут выдаваться на пром, иначе на тест
-                markup.add(types.InlineKeyboardButton(text=spr.name,
+                markup.add(types.InlineKeyboardButton(text=spr.name.capitalize(),
                                                       url=spr.url if MODE == 'PROM' else spr.url_test))
     bot.send_message(chat_id=message.chat.id, text='Справки по вашему запросу (%s шт.)' % count_spr,
                      reply_markup=markup)
