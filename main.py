@@ -11,8 +11,7 @@ bot.set_my_commands(commands=[types.BotCommand(command='/start', description='Н
                               types.BotCommand(command='/help', description='Описание работы бота и основные команды'),
                               types.BotCommand(command='/menu', description='Аналитические правки ЦОММ'),
                               types.BotCommand(command='/mode', description='Режим работы бота'),
-                              types.BotCommand(command='/setmode', description='Установить режим мода (TEST/PROM)'),
-                              types.BotCommand(command='/meh', description='Посмотреть на Михалыча')])
+                              types.BotCommand(command='/setmode', description='Установить режим мода (TEST/PROM)')])
 
 
 @bot.message_handler(commands=['start', 'help', 'meh', 'mode', 'setmode', 'menu'])
@@ -21,7 +20,8 @@ def mode(message):
     if message.text == '/start':
         bot.send_message(chat_id=message.chat.id, text='Для работы бота введите фрагмент названия справки')
     elif message.text == '/help':
-        bot.send_message(chat_id=message.chat.id, text='пока пусто')
+        with open(file='help.txt', mode='rb') as f:
+            bot.send_message(chat_id=message.chat.id, text=f.read())
     elif message.text == '/meh':
         meh = open('meh.webp', mode='rb')
         bot.send_sticker(chat_id=message.chat.id, data=meh)
@@ -34,11 +34,6 @@ def mode(message):
         bot.send_message(chat_id=message.chat.id, text='Выберите режим работы бота:', reply_markup=markup)
     elif message.text == '/menu':
         markup = types.InlineKeyboardMarkup(row_width=3)
-        markup.add(types.InlineKeyboardButton(text='Назад', callback_data=10))
-        t = 1
-        row = []
-        for report_name in reports.ANALIT_SPRAVKI_COMM.keys():
-            row.append(types.InlineKeyboardButton(text=report_name, url='', callback_data=report_name))
         for g in grid(it=list(reports.ANALIT_SPRAVKI_COMM.keys()), count=2):
             row = []
             for report_name in g:
@@ -73,9 +68,29 @@ def callback_query(call):
         MODE = call.data
         bot.answer_callback_query(callback_query_id=call.id, text='Установлен режим работы бота: ' + MODE)
     elif call.data in reports.ANALIT_SPRAVKI_COMM.keys():
-        pass
-    else:
-        pass
+        markup = types.InlineKeyboardMarkup()
+        main_menu = types.InlineKeyboardButton(text='🏠Вернуться в главное меню', callback_data='main menu')
+        markup.add(main_menu)
+        for spr in reports.ANALIT_SPRAVKI_COMM[call.data]:
+            markup.add(types.InlineKeyboardButton(text=spr.name.capitalize(),
+                                                  url=spr.url if MODE == 'PROM' else spr.url_test))
+
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.id,
+                              text='Выберите справку:',
+                              reply_markup=markup)
+    elif call.data == 'main menu':
+        markup = types.InlineKeyboardMarkup()
+        for g in grid(it=list(reports.ANALIT_SPRAVKI_COMM.keys()), count=2):
+            row = []
+            for report_name in g:
+                row.append(types.InlineKeyboardButton(text=report_name, callback_data=report_name))
+            markup.add(*row)
+            row.clear()
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.id,
+                              text='Выберите раздел:',
+                              reply_markup=markup)
 
 
 #
