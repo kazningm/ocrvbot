@@ -15,7 +15,7 @@ bot.set_my_commands(commands=[types.BotCommand(command='/start', description='Н
 
 
 @bot.message_handler(commands=['start', 'help', 'meh', 'mode', 'setmode', 'menu'])
-def mode(message):
+def send_command(message):
     global MODE
     if message.text == '/start':
         bot.send_message(chat_id=message.chat.id, text='Для работы бота введите фрагмент названия справки')
@@ -43,9 +43,8 @@ def mode(message):
         bot.send_message(chat_id=message.chat.id, text='Выберите раздел:', reply_markup=markup)
 
 
-
 @bot.message_handler(content_types=['text'])
-def send(message):
+def send_text(message):
     global MODE
     # bot.send_message(chat_id=message.chat.id, text='s', reply_markup=types.ReplyKeyboardRemove())
     count_spr = 0  # количество найденных справок по запросу пользователя
@@ -91,6 +90,32 @@ def callback_query(call):
                               message_id=call.message.id,
                               text='Выберите раздел:',
                               reply_markup=markup)
+
+
+@bot.inline_handler(func=lambda query: len(query.query) > 0)
+def inline(query):
+    global MODE
+    reports_names = {spr.name: (spr.url if MODE == 'PROM' else spr.url_test) for k, v in reports.ANALIT_SPRAVKI_COMM.items() for spr in v}
+    articles = []
+    id_spr = 100
+    ocrv_icon = 'https://www.graycell.ru/picture/big/skobka.jpg'
+    for rn in reports_names.keys():
+        if query.query.lower() in rn:
+            # print(rn)
+            r = types.InlineQueryResultArticle(
+                id=str(id_spr),
+                title='Справка:',
+                input_message_content=types.InputTextMessageContent(rn),
+                description=rn[:50],
+                thumb_url=ocrv_icon,
+                # thumb_height=48,
+                thumb_width=48,
+                url=reports_names[rn],
+                hide_url=True
+            )
+            id_spr += 1
+            articles.append(r)
+    bot.answer_inline_query(inline_query_id=query.id, results=articles)
 
 
 #

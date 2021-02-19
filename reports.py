@@ -1,7 +1,7 @@
 from dev import Spravka
 
 href = 'http://romul.gvc.oao.rzd:8080/SASStoredProcess/do?_program=/OCRVFoundation/AOM/Daily/SP/'
-hreft = 'http://romul.gvc.oao.rzd:8081/SASStoredProcess/do?_program=/OCRVFoundation/AOM/Daily/SP/'
+hreft = 'http://caesar.gvc.oao.rzd:8081/SASStoredProcess/do?_program=/OCRVFoundation/AOM/Daily/SP/'
 # аналитические справки ЦОММ
 ANALIT_SPRAVKI_COMM = {
     "ввод информации": (
